@@ -1,0 +1,64 @@
+#include "MysqlI.h" 
+
+bool MySqlConn::connect(string UserName,string Password,string DataBase) 
+{
+	MySqlConn::host="localhost";
+	MySqlConn::username=UserName;
+	MySqlConn::password=Password;
+	MySqlConn::database=DataBase;
+	MySqlConn::port=3306;
+	MySqlConn::socket="\0";
+	MySqlConn::client_flag=0;
+
+	if( (mysql=mysql_init(NULL))!=NULL )
+	{
+		cout<<"Init succeed!"<<endl;	
+	}
+	else
+	{
+		cout<<"Init fail!"<<endl;
+		return false;
+	}
+	if( (mysql_real_connect(mysql,host.c_str(),username.c_str(),password.c_str(),
+		database.c_str(),port,socket.c_str(),client_flag))!=NULL)
+	{
+		mysql_query(mysql, "SET NAMES GBK");
+	}
+	else
+	{
+		return false;	
+	}
+	return true;
+}
+
+MYSQL_RES* MySqlConn::query(string queryStr)	//return MYSQL_RES point(res)
+{
+	mysql_real_query(MySqlConn::mysql,queryStr.c_str(),queryStr.length());
+	res=mysql_use_result(mysql);
+	return res;
+}
+
+bool MySqlConn::execute(string execuStr)		//execute SQL
+{
+	if(!(mysql_real_query(mysql,execuStr.c_str(),execuStr.length()) ))
+	{
+		cout<<"excute succeed\n";
+		return true;
+	}
+	else
+	{
+		cout<<"excute fail!\n";
+		return false;
+	}
+
+}
+
+int MySqlConn::affectedRows()    //the rows the lattest time excute insert delete update
+{
+	return (int)mysql_affected_rows(mysql);
+}
+
+void MySqlConn::close()          //disconnect
+{
+	mysql_close(mysql);
+}	
